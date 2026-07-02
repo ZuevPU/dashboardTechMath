@@ -376,9 +376,9 @@ D.nps.blocks_sorted.forEach(b=>{
     </div>
     <span class="val">+${b.nps} <small>·${b.mean}</small></span>`));
 });
-const top=D.nps.blocks_sorted[0], bot=D.nps.blocks_sorted[D.nps.blocks_sorted.length-1];
+const fmtTop=D.nps.blocks_sorted[0], fmtBot=D.nps.blocks_sorted[D.nps.blocks_sorted.length-1];
 $("#fmtNote").innerHTML=`<div class="h">Как читать</div>
-  Лидеры — <b>${top.name}</b> (+${top.nps}) и практико-ориентированные форматы (GenAI, хакатон). Ниже остальных — <b>${bot.name}</b> (+${bot.nps}) и «Защита проекта». Но их доверительные интервалы перекрываются с серединой рейтинга, поэтому корректный вывод: это «крепкая середина», а не провал. Приоритет для доработки — форматы с самым длинным хвостом оценок ≤6.`;
+  Лидеры — <b>${fmtTop.name}</b> (+${fmtTop.nps}) и практико-ориентированные форматы (GenAI, хакатон). Ниже остальных — <b>${fmtBot.name}</b> (+${fmtBot.nps}) и «Защита проекта». Но их доверительные интервалы перекрываются с серединой рейтинга, поэтому корректный вывод: это «крепкая середина», а не провал. Приоритет для доработки — форматы с самым длинным хвостом оценок ≤6.`;
 
 /* 1-5 scales */
 const sc=D.scales.scales;
