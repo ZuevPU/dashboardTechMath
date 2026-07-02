@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Техноматика · Аналитика финального опроса</title>
+<style>
+:root{
+  --green:#7CC142; --green2:#7BC83E; --ink:#0F0F0F; --mint:#D4F7EC;
+  --graphite:#5A5A5E; --line:#E7E9E4; --bg:#FAFBF8; --card:#FFFFFF;
+  --red:#E05A4E; --amber:#E8A13A; --grey:#B9BDB4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+a{color:inherit}
+
+/* header */
+header{background:var(--ink);color:#fff;padding:26px 0 22px;position:relative;overflow:hidden}
+header .wrap{position:relative;z-index:2}
+.chev-bg{position:absolute;inset:0;opacity:.10;z-index:1;
+  background-image:repeating-linear-gradient(135deg,transparent 0 26px,var(--green) 26px 30px)}
+.brand{display:flex;align-items:baseline;gap:10px;font-weight:700;letter-spacing:.5px}
+.brand .wm{font-size:22px;text-transform:lowercase}
+.brand .wm b{color:var(--green)}
+.brand .tag{font-size:12px;color:#B9BDB4;font-weight:400;letter-spacing:.3px}
+h1{font-size:26px;margin:14px 0 4px;font-weight:700;line-height:1.15}
+.sub{color:#C7CBC2;font-size:13px}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  padding:5px 11px;border-radius:20px;font-size:12px;color:#E8EBE5}
+.pill b{color:var(--green)}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--line);
+  box-shadow:0 1px 0 rgba(0,0,0,.02)}
+nav .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:15px 15px 12px;font-size:13.5px;font-family:inherit;
+  color:var(--graphite);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  font-weight:600;transition:color .15s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--green)}
+.tab .cx{color:var(--green);margin-right:5px}
+
+/* sections */
+main{padding:28px 0 60px}
+.panel{display:none;animation:fade .25s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--green);font-weight:700;margin:0 0 4px}
+.eyebrow::before{content:"›";font-size:18px;line-height:1}
+h2{font-size:21px;margin:0 0 3px;font-weight:700}
+.lead{color:var(--graphite);font-size:13.5px;margin:0 0 20px;max-width:760px}
+.sec{margin-bottom:34px}
+
+/* grid + cards */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card.hero{background:linear-gradient(160deg,#12210A 0%,#0F0F0F 70%);color:#fff;border:0;position:relative;overflow:hidden}
+.card.hero .cx{position:absolute;right:-10px;top:-20px;font-size:150px;color:var(--green);opacity:.13;line-height:1}
+.klabel{font-size:12px;color:var(--graphite);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.card.hero .klabel{color:#A9C48F}
+.kval{font-size:44px;font-weight:800;line-height:1;margin:8px 0 2px;letter-spacing:-1px}
+.kval.sm{font-size:30px}
+.kunit{font-size:15px;color:var(--graphite);font-weight:600}
+.card.hero .kunit{color:#C7D3B8}
+.ci{font-size:12px;color:var(--graphite);margin-top:6px}
+.card.hero .ci{color:#9FB58A}
+.knote{font-size:12px;color:var(--graphite);margin-top:8px;line-height:1.4}
+
+/* NPS split bar */
+.split{height:12px;border-radius:8px;overflow:hidden;display:flex;margin-top:14px;background:#eee}
+.split i{display:block;height:100%}
+.split .p{background:var(--green)} .split .n{background:var(--red)} .split .z{background:var(--grey)}
+.legend{display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:var(--graphite);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* ranked bars */
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:200px 1fr 92px;align-items:center;gap:12px}
+.bar .nm{font-size:13px;text-align:right;color:var(--ink)}
+.bar .track{position:relative;height:26px;background:#F0F2ED;border-radius:7px;overflow:visible}
+.bar .fill{position:absolute;left:0;top:0;height:100%;border-radius:7px;
+  background:linear-gradient(90deg,var(--green2),var(--green));display:flex;align-items:center}
+.bar .whisk{position:absolute;top:50%;height:2px;background:rgba(15,15,15,.35)}
+.bar .whisk::before,.bar .whisk::after{content:"";position:absolute;top:-4px;width:2px;height:10px;background:rgba(15,15,15,.35)}
+.bar .whisk::before{left:0}.bar .whisk::after{right:0}
+.bar .val{font-size:14px;font-weight:700;color:var(--ink)}
+.bar .val small{color:var(--graphite);font-weight:400;font-size:11px}
+.axis{display:grid;grid-template-columns:200px 1fr 92px;gap:12px;font-size:10px;color:var(--grey);margin-bottom:2px}
+.axis .sc{display:flex;justify-content:space-between}
+
+/* T2B / distribution rows */
+.srow{display:grid;grid-template-columns:190px 60px 1fr;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border:0}
+.srow .nm{font-size:13px}
+.srow .mn{font-size:16px;font-weight:700}
+.srow .mn small{font-size:11px;color:var(--graphite);font-weight:400}
+.stack{height:20px;border-radius:5px;overflow:hidden;display:flex;background:#eee}
+.stack i{height:100%}
+.s5{background:var(--green)} .s4{background:#B5DE8A} .s3{background:#F0D48A} .s2{background:#E8A98A} .s1{background:var(--red)}
+.t2b-tag{font-size:11px;color:var(--graphite);margin-left:8px}
+
+/* freq list */
+.freq{display:flex;flex-direction:column;gap:7px}
+.frow{display:grid;grid-template-columns:1fr 60px;align-items:center;gap:10px}
+.frow .fb{position:relative;height:22px;background:#F0F2ED;border-radius:6px;overflow:hidden}
+.frow .fb i{position:absolute;left:0;top:0;height:100%;border-radius:6px;background:var(--mint)}
+.frow .fb i.warm{background:#FBE0B0}
+.frow .ft{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;z-index:2;color:var(--ink)}
+.frow .fn{font-size:13px;font-weight:700;text-align:right}
+.frow .fn small{color:var(--graphite);font-weight:400;font-size:11px}
+
+/* segments */
+.segcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+.segcard h4{margin:0 0 12px;font-size:14px}
+.segrow{display:grid;grid-template-columns:1fr 44px 70px;align-items:center;gap:8px;padding:6px 0}
+.segrow .sg{font-size:12.5px}
+.segrow .sn{font-size:11px;color:var(--graphite);text-align:right}
+.segbar{grid-column:1/-1;height:8px;border-radius:5px;background:#F0F2ED;overflow:hidden;margin-top:-2px}
+.segbar i{display:block;height:100%;background:var(--green);border-radius:5px}
+.npsbadge{font-weight:700;text-align:right;font-size:14px}
+
+/* callout */
+.callout{background:var(--mint);border:1px solid #B4EAD7;border-radius:12px;padding:15px 17px;font-size:13px;color:#0C3B2C}
+.callout.warn{background:#FFF4E0;border-color:#F5D9A0;color:#6B4A12}
+.callout b{font-weight:700}
+.callout .h{display:flex;align-items:center;gap:7px;font-weight:700;margin-bottom:5px}
+
+/* table */
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:620px}
+table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}
+thead th{position:sticky;top:0;background:var(--ink);color:#fff;padding:9px 10px;text-align:left;font-weight:600;z-index:3}
+thead th:first-child{position:sticky;left:0;z-index:4}
+tbody td{padding:7px 10px;border-bottom:1px solid var(--line)}
+tbody td:first-child{position:sticky;left:0;background:var(--card);font-weight:600}
+tbody tr:hover td{background:#F4F8EF}
+tbody tr:hover td:first-child{background:#EDF6E2}
+.cellhi{color:var(--green);font-weight:700}
+.celllo{color:var(--red);font-weight:700}
+.tbl-tools{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.tbl-tools input{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;width:230px}
+.tbl-tools .cnt{font-size:12px;color:var(--graphite)}
+
+footer{border-top:1px solid var(--line);padding:22px 0;color:var(--graphite);font-size:12px}
+footer b{color:var(--ink)}
+
+@media(max-width:820px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+  .bar,.axis{grid-template-columns:130px 1fr 78px}
+  .bar .nm{font-size:11.5px}
+  .srow{grid-template-columns:130px 50px 1fr}
+  h1{font-size:21px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="chev-bg"></div>
+  <div class="wrap">
+    <div class="brand"><span class="wm">техно<b>матика</b></span><span class="tag">· аналитика</span></div>
+    <h1>Финальный опрос программы · сводный дашборд</h1>
+    <div class="sub">Профессиональный интенсив для учителей информатики · Иркутск · 30 июня — 2 июля 2026</div>
+    <div class="meta-row" id="metaRow"></div>
+  </div>
+</header>
+
+<nav><div class="wrap" id="tabs"></div></nav>
+
+<main class="wrap">
+  <!-- ОБЗОР -->
+  <section class="panel on" id="p-obzor">
+    <div class="eyebrow">сводка</div>
+    <h2>Ключевые метрики</h2>
+    <p class="lead">Главная метрика — NPS программы. Показатели приведены с 95% доверительными интервалами: при выборке в 75 ответов важно видеть не точку, а диапазон.</p>
+    <div class="grid g4" id="kpiCards"></div>
+    <div class="sec"></div>
+    <div class="grid g2">
+      <div class="card">
+        <div class="klabel">Распределение · рекомендация программы</div>
+        <div id="npsSplit"></div>
+      </div>
+      <div class="callout warn" id="limitsBox"></div>
+    </div>
+    <div class="sec"></div>
+    <div class="eyebrow">кто ответил</div>
+    <h2 style="margin-bottom:14px">Портрет выборки</h2>
+    <div class="grid g3" id="demoCards"></div>
+  </section>
+
+  <!-- ФОРМАТЫ -->
+  <section class="panel" id="p-formaty">
+    <div class="eyebrow">раздел III · рекомендация форматов</div>
+    <h2>NPS по форматам</h2>
+    <p class="lead">Каждый формат оценивался по шкале 0–10. Планка (усы) — 95% доверительный интервал. Если интервалы двух форматов перекрываются — разница между ними статистически неотличима.</p>
+    <div class="card">
+      <div class="axis"><span></span><div class="sc"><span>0</span><span>+25</span><span>+50</span><span>+75</span><span>+100</span></div><span></span></div>
+      <div class="bars" id="fmtBars"></div>
+    </div>
+    <div class="sec"></div>
+    <div class="callout" id="fmtNote"></div>
+  </section>
+
+  <!-- ОПЫТ -->
+  <section class="panel" id="p-opyt">
+    <div class="eyebrow">шкалы 1–5 · опыт обучения</div>
+    <h2>Качество опыта</h2>
+    <p class="lead">Основная метрика для 5-балльных шкал — доля ответов 4–5 (Top-2-Box, «скорее да / да»). Цвет полосы: <span style="color:var(--green);font-weight:700">5</span> · <span style="color:#8CBB5E;font-weight:700">4</span> · <span style="color:#D6B24E;font-weight:700">3</span> · <span style="color:var(--red);font-weight:700">1–2</span>.</p>
+    <div class="card"><div id="scaleRows"></div></div>
+  </section>
+
+  <!-- ДРАЙВЕРЫ -->
+  <section class="panel" id="p-drivery">
+    <div class="eyebrow">что двигает результат</div>
+    <h2>Драйверы, капитал и барьеры</h2>
+    <p class="lead">Слева — что участники «унесли» и что помогало вовлекаться. Справа — барьеры. Корреляции внизу показывают, какие блоки сильнее всего связаны с итоговой рекомендацией программы.</p>
+    <div class="grid g2">
+      <div class="card"><div class="klabel">Личный капитал — что усилили</div><div class="freq" id="capital" style="margin-top:12px"></div></div>
+      <div class="card"><div class="klabel">Что помогало вовлекаться</div><div class="freq" id="helped" style="margin-top:12px"></div></div>
+    </div>
+    <div class="sec"></div>
+    <div class="grid g2">
+      <div class="card"><div class="klabel">Барьеры вовлечённости</div><div class="freq" id="hinder" style="margin-top:12px"></div></div>
+      <div class="card"><div class="klabel">Что затрудняло усвоение материала</div><div class="freq" id="difficulty" style="margin-top:12px"></div></div>
+    </div>
+    <div class="sec"></div>
+    <div class="card">
+      <div class="klabel">Драйверы итогового NPS · корреляция Пирсона</div>
+      <p class="knote">Осторожно: при «потолочном» распределении оценок это сигнал приоритета, а не причинность.</p>
+      <div class="freq" id="drivers" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- СЕГМЕНТЫ -->
+  <section class="panel" id="p-segmenty">
+    <div class="eyebrow">кто рекомендует сильнее</div>
+    <h2>Сегменты</h2>
+    <p class="lead">NPS программы в разрезе стажа, пола и возраста. Малые группы (n&lt;10) приведены для полноты, но по ним выводы делать нельзя.</p>
+    <div class="grid g3">
+      <div class="segcard"><h4>По стажу преподавания</h4><div id="segStazh"></div></div>
+      <div class="segcard"><h4>По полу</h4><div id="segGender"></div></div>
+      <div class="segcard"><h4>По возрасту</h4><div id="segAge"></div></div>
+    </div>
+    <div class="sec"></div>
+    <div class="callout" id="segNote"></div>
+  </section>
+
+  <!-- ГОЛОС -->
+  <section class="panel" id="p-golos">
+    <div class="eyebrow">качественный блок</div>
+    <h2>Голос участников</h2>
+    <p class="lead">Ценность взаимодействия с коллегами — прекодированные ответы. И самооценка сложностей в коммуникации.</p>
+    <div class="grid g2">
+      <div class="card"><div class="klabel">Что было наиболее ценным во взаимодействии</div><div class="freq" id="valuable" style="margin-top:12px"></div></div>
+      <div class="card"><div class="klabel">Возникали ли сложности во взаимодействии</div><div class="freq" id="diffs" style="margin-top:12px"></div>
+        <div class="callout" style="margin-top:14px" id="golosNote"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ДАННЫЕ -->
+  <section class="panel" id="p-dannye">
+    <div class="eyebrow">лист данных · response-level</div>
+    <h2>Таблица ответов</h2>
+    <p class="lead">Полная выгрузка на уровне респондента (75 строк). Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики. Поиск фильтрует по всем полям.</p>
+    <div class="tbl-tools">
+      <input id="tblSearch" placeholder="Поиск по таблице…">
+      <span class="cnt" id="tblCount"></span>
+    </div>
+    <div class="tablewrap"><table id="dataTable"></table></div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  Источник: выгрузка финального опроса, 75 ответов, 2 июля 2026. Методика: NPS (промоутеры 9–10 − критики 0–6), Top-2-Box для шкал 1–5, доверительные интервалы 95%.
+  <b>CSI организации и RR</b> не рассчитаны — см. раздел «Обзор».
+</div></footer>
+
+<script>
+const D = {"nps": {"N": 75, "main": {"n": 75, "prom": 58, "pas": 15, "det": 2, "p_prom": 77.3, "p_pas": 20.0, "p_det": 2.7, "nps": 74.7, "ci": 11.2, "lo": 63.4, "hi": 85.9, "mean": 9.31}, "participate": {"n": 75, "prom": 61, "pas": 12, "det": 2, "p_prom": 81.3, "p_pas": 16.0, "p_det": 2.7, "nps": 78.7, "ci": 10.7, "lo": 68.0, "hi": 89.4, "mean": 9.48}, "blocks": [{"n": 75, "prom": 68, "pas": 5, "det": 2, "p_prom": 90.7, "p_pas": 6.7, "p_det": 2.7, "nps": 88.0, "ci": 9.1, "lo": 78.9, "hi": 97.1, "mean": 9.59, "name": "Лекция-погружение «ИТ-фронтир»"}, {"n": 75, "prom": 65, "pas": 7, "det": 3, "p_prom": 86.7, "p_pas": 9.3, "p_det": 4.0, "nps": 82.7, "ci": 10.8, "lo": 71.9, "hi": 93.4, "mean": 9.49, "name": "Лекция «Визуализация данных»"}, {"n": 75, "prom": 62, "pas": 9, "det": 4, "p_prom": 82.7, "p_pas": 12.0, "p_det": 5.3, "nps": 77.3, "ci": 12.1, "lo": 65.2, "hi": 89.4, "mean": 9.31, "name": "Лекция «Проектная деятельность»"}, {"n": 75, "prom": 58, "pas": 8, "det": 9, "p_prom": 77.3, "p_pas": 10.7, "p_det": 12.0, "nps": 65.3, "ci": 15.6, "lo": 49.8, "hi": 80.9, "mean": 8.96, "name": "Сессия «Архитектура ИТ»"}, {"n": 75, "prom": 57, "pas": 12, "det": 6, "p_prom": 76.0, "p_pas": 16.0, "p_det": 8.0, "nps": 68.0, "ci": 14.0, "lo": 54.0, "hi": 82.0, "mean": 9.13, "name": "МК «Защита проекта»"}, {"n": 75, "prom": 68, "pas": 4, "det": 3, "p_prom": 90.7, "p_pas": 5.3, "p_det": 4.0, "nps": 86.7, "ci": 10.1, "lo": 76.6, "hi": 96.7, "mean": 9.59, "name": "МК «GenAI в проектировании»"}, {"n": 75, "prom": 66, "pas": 4, "det": 5, "p_prom": 88.0, "p_pas": 5.3, "p_det": 6.7, "nps": 81.3, "ci": 12.2, "lo": 69.2, "hi": 93.5, "mean": 9.48, "name": "МК «Фундам. основы информатики»"}, {"n": 75, "prom": 64, "pas": 8, "det": 3, "p_prom": 85.3, "p_pas": 10.7, "p_det": 4.0, "nps": 81.3, "ci": 11.0, "lo": 70.4, "hi": 92.3, "mean": 9.43, "name": "Практикум «GenAI в обучении»"}, {"n": 75, "prom": 63, "pas": 8, "det": 4, "p_prom": 84.0, "p_pas": 10.7, "p_det": 5.3, "nps": 78.7, "ci": 11.9, "lo": 66.7, "hi": 90.6, "mean": 9.21, "name": "Инженерный турнир"}, {"n": 75, "prom": 67, "pas": 6, "det": 2, "p_prom": 89.3, "p_pas": 8.0, "p_det": 2.7, "nps": 86.7, "ci": 9.4, "lo": 77.3, "hi": 96.0, "mean": 9.51, "name": "Хакатон"}], "blocks_sorted": [{"n": 75, "prom": 68, "pas": 5, "det": 2, "p_prom": 90.7, "p_pas": 6.7, "p_det": 2.7, "nps": 88.0, "ci": 9.1, "lo": 78.9, "hi": 97.1, "mean": 9.59, "name": "Лекция-погружение «ИТ-фронтир»"}, {"n": 75, "prom": 68, "pas": 4, "det": 3, "p_prom": 90.7, "p_pas": 5.3, "p_det": 4.0, "nps": 86.7, "ci": 10.1, "lo": 76.6, "hi": 96.7, "mean": 9.59, "name": "МК «GenAI в проектировании»"}, {"n": 75, "prom": 67, "pas": 6, "det": 2, "p_prom": 89.3, "p_pas": 8.0, "p_det": 2.7, "nps": 86.7, "ci": 9.4, "lo": 77.3, "hi": 96.0, "mean": 9.51, "name": "Хакатон"}, {"n": 75, "prom": 65, "pas": 7, "det": 3, "p_prom": 86.7, "p_pas": 9.3, "p_det": 4.0, "nps": 82.7, "ci": 10.8, "lo": 71.9, "hi": 93.4, "mean": 9.49, "name": "Лекция «Визуализация данных»"}, {"n": 75, "prom": 66, "pas": 4, "det": 5, "p_prom": 88.0, "p_pas": 5.3, "p_det": 6.7, "nps": 81.3, "ci": 12.2, "lo": 69.2, "hi": 93.5, "mean": 9.48, "name": "МК «Фундам. основы информатики»"}, {"n": 75, "prom": 64, "pas": 8, "det": 3, "p_prom": 85.3, "p_pas": 10.7, "p_det": 4.0, "nps": 81.3, "ci": 11.0, "lo": 70.4, "hi": 92.3, "mean": 9.43, "name": "Практикум «GenAI в обучении»"}, {"n": 75, "prom": 63, "pas": 8, "det": 4, "p_prom": 84.0, "p_pas": 10.7, "p_det": 5.3, "nps": 78.7, "ci": 11.9, "lo": 66.7, "hi": 90.6, "mean": 9.21, "name": "Инженерный турнир"}, {"n": 75, "prom": 62, "pas": 9, "det": 4, "p_prom": 82.7, "p_pas": 12.0, "p_det": 5.3, "nps": 77.3, "ci": 12.1, "lo": 65.2, "hi": 89.4, "mean": 9.31, "name": "Лекция «Проектная деятельность»"}, {"n": 75, "prom": 57, "pas": 12, "det": 6, "p_prom": 76.0, "p_pas": 16.0, "p_det": 8.0, "nps": 68.0, "ci": 14.0, "lo": 54.0, "hi": 82.0, "mean": 9.13, "name": "МК «Защита проекта»"}, {"n": 75, "prom": 58, "pas": 8, "det": 9, "p_prom": 77.3, "p_pas": 10.7, "p_det": 12.0, "nps": 65.3, "ci": 15.6, "lo": 49.8, "hi": 80.9, "mean": 8.96, "name": "Сессия «Архитектура ИТ»"}], "age_outliers": 1}, "scales": {"scales": {"Достижение целей": {"n": 70, "mean": 4.29, "t2b": 85.7, "dist": {"1": 1, "2": 2, "3": 7, "4": 26, "5": 34}, "median": 4.0}, "Интерес": {"n": 75, "mean": 4.73, "t2b": 96.0, "dist": {"1": 0, "2": 0, "3": 3, "4": 14, "5": 58}, "median": 5.0}, "Психол. безопасность": {"n": 75, "mean": 4.73, "t2b": 92.0, "dist": {"1": 0, "2": 0, "3": 6, "4": 8, "5": 61}, "median": 5.0}, "Ценность взаимодействия": {"n": 75, "mean": 4.67, "t2b": 94.7, "dist": {"1": 1, "2": 0, "3": 3, "4": 15, "5": 56}, "median": 5.0}, "Понятность материала": {"n": 75, "mean": 4.32, "t2b": 84.0, "dist": {"1": 1, "2": 0, "3": 11, "4": 25, "5": 38}, "median": 5.0}, "Применимость знаний": {"n": 75, "mean": 4.56, "t2b": 92.0, "dist": {"1": 1, "2": 0, "3": 5, "4": 19, "5": 50}, "median": 5.0}, "Форматы рефлексии": {"n": 75, "mean": 4.6, "t2b": 94.7, "dist": {"1": 0, "2": 0, "3": 4, "4": 22, "5": 49}, "median": 5.0}}, "capital": {"Профессиональные инструменты и подходы": 62, "Новые связи и полезные контакты": 50, "следующих шагов": 44, "Уверенность и проявленность": 27, "Энергия и ресурсное состояние": 28, "Влияние на процессы (запуск изменений, договорённости)": 18, "Ничего из перечисленного": 0, "Затрудняюсь ответить": 5}, "helped": {"Личное отношение к теме и внутренняя мотивация": 39, "Ощущение, что мой вклад важен": 20, "Интересный контент (темы, примеры, материалы)": 65, "Комфортный темп": 28, "ведущих": 46, "экспертов": 45, "Практические форматы (кейсы, задания, разборы)": 49, "Комфортные условия и инфраструктура": 36, "Доброжелательная атмосфера": 51, "Внеучебные и развлекательные активности": 24, "Ничего из перечисленного": 2}, "hinder": {"большой объём информации": 37, "Сложность включения в групповые форматы": 21, "Сложности в командной работе": 22, "Ориентирование в пространстве и логистике": 23, "личное)": 33, "Недостаточное понимание личной пользы": 17, "Ощущение, что участие не влияет на результат": 22, "Ничего из перечисленного": 47}, "support": {"Логика и последовательность блоков": 36, "Темп программы": 21, "экспертов": 49, "Работа модераторов": 44, "Забота команды организаторов": 37, "Комфортные условия пребывания": 41, "Практические задания и разборы": 43, "Обсуждения и ответы на вопросы по ходу": 44, "Ничего из перечисленного": 1}, "difficulty": {"Слишком высокий темп": 20, "Слишком много информации": 21, "Не хватало пауз для осмысления": 16, "Логика блоков не всегда понятна": 8, "Не хватало практики и разбора примеров": 15, "Не хватало времени на вопросы и обсуждение": 17, "Сложная подача некоторых тем": 8, "Ничего не затрудняло": 33}}, "seg": {"seg": [{"group": "Не преподаю информатику", "n": 1, "nps": 100.0, "interest_mean": 5.0}, {"group": "До 3 лет", "n": 7, "nps": 100.0, "interest_mean": 4.86}, {"group": "От 3 до 10 лет", "n": 26, "nps": 61.5, "interest_mean": 4.69}, {"group": "Более 10 лет", "n": 41, "nps": 78.0, "interest_mean": 4.73}], "gender": [{"g": "женский", "n": 56, "nps": 78.6}, {"g": "мужской", "n": 19, "nps": 63.2}], "age": [{"g": "до 30", "n": 14, "nps": 85.7}, {"g": "30–39", "n": 21, "nps": 66.7}, {"g": "40–49", "n": 23, "nps": 69.6}, {"g": "50+", "n": 16, "nps": 81.2}], "age_mean": 41.1, "age_median": 40.5, "drivers": [["Междисциплинарная среда информатики в ", 0.515], ["Фундаментальные основы информатики", 0.496], ["Основы проектной деятельности", 0.449], ["От предметной задачи к цифровому проек", 0.42], ["Основы визуализации данных", 0.408], ["Насколько Вам было интересно участвова", 0.38], ["Насколько материал программы был Вам п", 0.358], ["Современные подходы в использовании Ge", 0.33], ["Насколько ценным было взаимодействие с", 0.27], ["Насколько форматы рефлексии (итоги дня", 0.266], ["Современная архитектура информационных", 0.246], ["Насколько полученные знания и навыки п", 0.227], ["Как правильно защитить свой проект в м", 0.218], ["Инженерный практикум — турнир по решен", 0.215], ["Насколько во время программы Вам было ", 0.206], ["Основы использования GenAI в проектиро", 0.2], ["Насколько Вы достигли своих личных цел", 0.065]]}, "demo": {"gender_dist": {"женский": 56, "мужской": 19}, "stazh_dist": {"Более 10 лет": 41, "От 3 до 10 лет": 26, "До 3 лет": 7, "Не преподаю информатику": 1}, "age_hist": {"до 30": 14, "30–39": 21, "40–49": 23, "50+": 16}}, "qual": {"valuable": {"Совместные обсуждения и коллективное мышление": 27, "Обмен практиками «как у нас устроено»": 19, "Неформальное общение и атмосфера доверия": 9, "Обратная связь на идеи / подходы": 8, "Новые контакты / договорённости на будущее": 6, "Энергия и мотивация от общения": 4, "«Сверить реальность» с коллегами": 1, "Ничего из перечисленного": 1}, "difficulties": {"Нет": 54, "Скорее нет, чем да": 16, "Скорее да, чем нет": 4, "Да": 1}}, "table": {"headers": ["ID", "Время", "Пол", "Возраст", "Стаж", "NPS прогр.", "Участ. ещё", "ИТ-фронтир", "Визуал.", "Проектн.", "Архит.", "Защита", "GenAI-проект", "Фундам.", "GenAI-обуч", "Турнир", "Хакатон", "Цели", "Интерес", "Псих.безоп", "Взаимод.", "Понятн.", "Примен.", "Рефлекс."], "rows": [[2461977439, "05:23", "женский", 28, "Не преподаю информатику", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 5, 5, 5, 5, 5, 5], [2462224064, "11:50", "мужской", 27, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462224842, "11:51", "мужской", 27, "От 3 до 10 лет", 10, 10, 10, 9, 9, 9, 10, 10, 8, 8, 9, 10, 0, 5, 4, 5, 5, 5, 5], [2462226151, "11:52", "мужской", 33, "Более 10 лет", 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 3, 3, 3, 3, 3, 3], [2462226224, "11:52", "женский", 20, "До 3 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462226521, "11:52", "мужской", 29, "От 3 до 10 лет", 5, 10, 10, 10, 9, 10, 10, 10, 5, 10, 10, 10, 3, 5, 5, 5, 3, 5, 4], [2462226651, "11:53", "женский", 38, "Более 10 лет", 10, 10, 10, 8, 9, 8, 8, 10, 10, 10, 10, 10, 4, 5, 5, 5, 5, 5, 5], [2462226821, "11:53", "женский", 45, "От 3 до 10 лет", 8, 8, 10, 10, 10, 9, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 3, 5, 5], [2462227027, "11:53", "мужской", 40, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462227368, "11:53", "мужской", 30, "От 3 до 10 лет", 8, 8, 8, 9, 6, 9, 10, 10, 8, 10, 10, 9, 4, 4, 5, 4, 5, 4, 5], [2462227464, "11:53", "женский", 59, "Более 10 лет", 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 5, 4, 5, 5, 4, 5, 5], [2462227499, "11:53", "мужской", 36, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462227733, "11:54", "женский", 42, "Более 10 лет", 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 5, 5, 5], [2462227835, "11:54", "мужской", 30, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 7, 7, 10, 4, 5, 5, 5, 4, 4, 4], [2462227875, "11:54", "женский", 26, "До 3 лет", 10, 10, 10, 8, 8, 8, 10, 10, 10, 10, 10, 10, 3, 5, 5, 5, 4, 5, 5], [2462227879, "11:54", "женский", 29, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 8, 8, 8, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462227960, "11:54", "женский", 53, "Более 10 лет", 8, 8, 9, 9, 9, 9, 9, 10, 10, 10, 9, 10, 4, 5, 5, 5, 4, 4, 4], [2462228040, "11:54", "женский", 45, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 4, 5, 4], [2462228066, "11:54", "женский", 43, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 5, 5, 5, 4, 5, 5, 5], [2462228204, "11:54", "мужской", 44, "Более 10 лет", 10, 9, 9, 10, 9, 9, 9, 9, 10, 9, 9, 9, 4, 5, 5, 5, 4, 5, 4], [2462228226, "11:54", "мужской", 26, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228248, "11:54", "мужской", 51, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 4, 5, 4, 4], [2462228313, "11:54", "женский", 38, "Более 10 лет", 10, 10, 10, 10, 9, 7, 10, 8, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 4], [2462228406, "11:54", "женский", 37, "Более 10 лет", 7, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228564, "11:55", "женский", 60, "Более 10 лет", 10, 10, 10, 5, 5, 5, 5, 5, 5, 5, 7, 7, 2, 3, 3, 3, 3, 3, 4], [2462228638, "11:55", "женский", 39, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228676, "11:55", "женский", 42, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228716, "11:55", "женский", 39, "От 3 до 10 лет", 10, 10, 10, 10, 10, 9, 9, 9, 10, 10, 10, 9, 5, 5, 5, 5, 4, 5, 5], [2462228771, "11:55", "мужской", 34, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228826, "11:55", "женский", 48, "Более 10 лет", 10, 10, 10, 10, 10, 10, 7, 10, 10, 10, 9, 10, 0, 5, 4, 4, 4, 4, 5], [2462228868, "11:55", "женский", 37, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462228872, "11:55", "женский", 38, "От 3 до 10 лет", 7, 7, 8, 8, 8, 8, 10, 10, 10, 10, 10, 10, 5, 4, 5, 5, 5, 5, 5], [2462228926, "11:55", "женский", 34, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 3, 5, 5, 5, 5], [2462229048, "11:55", "женский", 37, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462229173, "11:55", "мужской", 37, "От 3 до 10 лет", 8, 10, 3, 3, 3, 5, 8, 10, 4, 3, 3, 4, 1, 3, 5, 1, 1, 1, 5], [2462229199, "11:55", "женский", 22, "До 3 лет", 10, 10, 10, 10, 10, 8, 10, 10, 10, 10, 10, 10, 4, 5, 5, 4, 4, 5, 5], [2462229242, "11:55", "мужской", 31, "От 3 до 10 лет", 8, 8, 10, 8, 8, 9, 7, 10, 10, 8, 9, 10, 5, 5, 5, 4, 5, 5, 5], [2462229462, "11:55", "женский", 46, "Более 10 лет", 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 5, 5, 5], [2462229464, "11:55", "женский", 57, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462229579, "11:56", "женский", 51, "Более 10 лет", 9, 9, 10, 8, 8, 10, 7, 10, 10, 8, 10, 10, 4, 4, 5, 4, 4, 4, 4], [2462229699, "11:56", "женский", 45, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 5, 5, 5, 5, 5, 5], [2462229843, "11:56", "женский", 39, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462230191, "11:56", "женский", 41, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 9, 9, 10, 10, 8, 10, 5, 5, 5, 5, 4, 5, 5], [2462230226, "11:56", "женский", 39, "Более 10 лет", 10, 10, 10, 10, 10, 10, 9, 10, 10, 10, 5, 9, 4, 5, 5, 4, 4, 5, 5], [2462230261, "11:56", "мужской", 44, "Более 10 лет", 7, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 4, 4, 5, 3, 4, 4], [2462230420, "11:56", "женский", 61, "Более 10 лет", 10, 10, 10, 10, 10, 8, 5, 6, 9, 9, 10, 10, 5, 5, 5, 5, 4, 3, 5], [2462230434, "11:56", "женский", 39, "До 3 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 4, 4, 4], [2462230589, "11:57", "мужской", 30, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462230676, "11:57", "женский", 46, "Более 10 лет", 9, 10, 9, 9, 9, 5, 5, 10, 10, 9, 7, 8, 5, 5, 5, 5, 5, 5, 4], [2462230746, "11:57", "женский", 58, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 4, 5, 5], [2462230771, "11:57", "женский", 29, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 3, 5, 4, 5, 5], [2462230897, "11:57", "женский", 42, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 3, 5, 5, 5, 5], [2462230932, "11:57", "женский", 45, "От 3 до 10 лет", 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4], [2462231019, "11:57", "женский", 38, "Более 10 лет", 8, 8, 8, 9, 8, 7, 6, 9, 6, 8, 9, 7, 5, 5, 5, 5, 5, 5, 5], [2462231072, "11:57", "женский", 42, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 4, 4, 4, 4, 5], [2462231083, "11:57", "женский", 22, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 4, 5, 5, 5, 3, 5], [2462231120, "11:57", "женский", 50, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 3, 4, 5, 5, 3, 4, 4], [2462231202, "11:57", "женский", 53, "Более 10 лет", 7, 8, 10, 10, 9, 9, 8, 10, 9, 10, 10, 10, 4, 4, 3, 4, 4, 4, 4], [2462231225, "11:57", "женский", 51, "До 3 лет", 9, 10, 10, 10, 8, 6, 8, 9, 10, 9, 7, 9, 3, 4, 5, 5, 3, 4, 4], [2462231279, "11:57", "женский", 56, "Более 10 лет", 10, 10, 10, 10, 10, 9, 10, 10, 10, 9, 9, 10, 4, 5, 5, 4, 4, 4, 3], [2462231874, "11:58", "женский", 43, "Более 10 лет", 10, 6, 10, 10, 9, 4, 9, 7, 9, 10, 8, 9, 4, 4, 5, 5, 4, 4, 4], [2462231887, "11:58", "женский", 44, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462231941, "11:58", "женский", 42, "До 3 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462232395, "11:58", "мужской", 27, "От 3 до 10 лет", 10, 7, 9, 10, 7, 4, 8, 10, 10, 10, 2, 10, 5, 4, 5, 5, 5, 5, 3], [2462232573, "11:59", "женский", 57, "Более 10 лет", 10, 10, 10, 9, 10, 4, 3, 10, 10, 9, 10, 10, 4, 5, 5, 4, 4, 5, 4], [2462232710, "11:59", "женский", 49, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 4, 5, 5, 5, 4, 5, 5], [2462233455, "11:59", "женский", 53, "Более 10 лет", 10, 10, 9, 10, 9, 9, 10, 10, 9, 9, 10, 9, 4, 4, 4, 4, 4, 3, 4], [2462234004, "12:00", "женский", 62, "Более 10 лет", 8, 8, 10, 10, 10, 10, 10, 10, 10, 10, 7, 10, 2, 5, 4, 5, 3, 4, 5], [2462234204, "12:00", "женский", "", "До 3 лет", 10, 10, 9, 10, 9, 10, 8, 10, 10, 8, 9, 9, 5, 5, 5, 5, 4, 5, 4], [2462238754, "12:05", "женский", 40, "От 3 до 10 лет", 7, 10, 7, 8, 8, 5, 8, 9, 10, 7, 9, 7, 3, 4, 4, 3, 3, 4, 3], [2462239068, "12:05", "женский", 49, "Более 10 лет", 9, 10, 9, 10, 10, 9, 10, 10, 10, 10, 9, 8, 4, 5, 5, 4, 3, 4, 4], [2462240096, "12:06", "женский", 49, "Более 10 лет", 9, 10, 10, 10, 10, 9, 10, 9, 9, 10, 9, 10, 4, 5, 5, 5, 3, 4, 4], [2462240982, "12:07", "женский", 72, "Более 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5, 5, 5, 5, 5, 5, 5], [2462245601, "12:12", "мужской", 28, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 5, 5, 5, 5, 5, 5], [2462255388, "12:22", "мужской", 27, "От 3 до 10 лет", 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 5, 5, 5, 5, 5, 5]]}};
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const pct = (v,m)=> (m>0? v/m*100:0);
+
+/* nav */
+const TABS=[["obzor","обзор"],["formaty","форматы"],["opyt","опыт обучения"],["drivery","драйверы"],["segmenty","сегменты"],["golos","голос участников"],["dannye","данные"]];
+const tabsEl=$("#tabs");
+TABS.forEach(([id,label],i)=>{
+  const b=el("button","tab"+(i===0?" active":""),'<span class="cx">›</span>'+label);
+  b.onclick=()=>{document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+    b.classList.add("active");$("#p-"+id).classList.add("on");window.scrollTo({top:0,behavior:"smooth"});};
+  tabsEl.appendChild(b);
+});
+
+/* meta pills */
+const m=D.nps.main;
+$("#metaRow").innerHTML=[
+  `<span class="pill">Ответов: <b>${m.n}</b></span>`,
+  `<span class="pill">NPS программы: <b>+${m.nps}</b></span>`,
+  `<span class="pill">Ср. возраст: <b>${D.seg.age_mean}</b></span>`,
+  `<span class="pill">RR: <b>не определён</b></span>`
+].join("");
+
+/* KPI cards */
+const part=D.nps.participate;
+const kpi=[
+  {hero:true,label:"NPS программы · главная метрика",val:"+"+m.nps,unit:"",ci:`95% ДИ  [+${m.lo} … +${m.hi}]`,note:`${m.prom} промоутеров · ${m.pas} пассивов · ${m.det} критика`},
+  {label:"Готовность участвовать снова",val:"+"+part.nps,ci:`[+${part.lo} … +${part.hi}]`,note:`ср. оценка ${part.mean} из 10`},
+  {label:"Интерес к программе · T2B",val:D.scales.scales["Интерес"].t2b,unit:"%",note:`ответили 4–5 · ср. ${D.scales.scales["Интерес"].mean}`},
+  {label:"Применимость знаний · T2B",val:D.scales.scales["Применимость знаний"].t2b,unit:"%",note:`ср. ${D.scales.scales["Применимость знаний"].mean} из 5`}
+];
+$("#kpiCards").innerHTML=kpi.map(k=>`
+  <div class="card ${k.hero?'hero':''}">
+    ${k.hero?'<span class="cx">›</span>':''}
+    <div class="klabel">${k.label}</div>
+    <div class="kval ${k.hero?'':'sm'}">${k.val}<span class="kunit">${k.unit||''}</span></div>
+    ${k.ci?`<div class="ci">${k.ci}</div>`:''}
+    <div class="knote">${k.note}</div>
+  </div>`).join("");
+
+/* NPS split */
+$("#npsSplit").innerHTML=`
+  <div class="split">
+    <i class="p" style="width:${m.p_prom}%"></i>
+    <i class="z" style="width:${m.p_pas}%"></i>
+    <i class="n" style="width:${m.p_det}%"></i>
+  </div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--green)"></i>Промоутеры (9–10) — ${m.p_prom}%</span>
+    <span><i class="dot" style="background:var(--grey)"></i>Пассивы (7–8) — ${m.p_pas}%</span>
+    <span><i class="dot" style="background:var(--red)"></i>Критики (0–6) — ${m.p_det}%</span>
+  </div>
+  <p class="knote" style="margin-top:14px">Распределение прижато к максимуму (ср. ${m.mean}/10). Высокий NPS отчасти отражает «потолочный эффект» и вероятную самоселекцию: опрос заполнили сразу после интенсива, недовольные чаще не отвечают. Интерпретировать как «очень высокую» лояльность, но не как точную оценку без учёта RR.</p>`;
+
+/* limits */
+$("#limitsBox").innerHTML=`
+  <div class="h">⚠ Ограничения расчёта</div>
+  <b>CSI организации (вопрос 6)</b> — в выгрузке нет колонок по проживанию, питанию, сопровождению. Блок собирался отдельно либо отсутствует; посчитать нельзя.<br><br>
+  <b>RR (Response Rate)</b> — не определён: нужен внешний знаменатель (число участников программы). Методика требует RR ≥ 50% для надёжной интерпретации.<br><br>
+  <b>Возраст:</b> 1 явный выброс (6769 лет) исключён из расчётов.`;
+
+/* demographics */
+const dem=D.demo;
+function miniBars(obj,total,order){
+  order=order||Object.keys(obj);
+  return order.filter(k=>obj[k]!=null).map(k=>{
+    const v=obj[k];return `<div class="segrow"><span class="sg">${k}</span><span class="npsbadge">${v}</span><span class="sn">${Math.round(pct(v,total))}%</span><div class="segbar"><i style="width:${pct(v,total)}%"></i></div></div>`;
+  }).join("");
+}
+$("#demoCards").innerHTML=`
+  <div class="segcard"><h4>Пол</h4>${miniBars(dem.gender_dist,m.n)}</div>
+  <div class="segcard"><h4>Стаж преподавания</h4>${miniBars(dem.stazh_dist,m.n,["Более 10 лет","От 3 до 10 лет","До 3 лет","Не преподаю информатику"])}</div>
+  <div class="segcard"><h4>Возраст (без выброса)</h4>${miniBars(dem.age_hist,74,["до 30","30–39","40–49","50+"])}<p class="knote">медиана ${D.seg.age_median} · среднее ${D.seg.age_mean}</p></div>`;
+
+/* format NPS bars with CI whiskers (scale -0..100 mapped, but values are 60-90) */
+const fb=$("#fmtBars");
+const scaleX=v=>Math.max(0,Math.min(100,v)); // 0..100 domain
+D.nps.blocks_sorted.forEach(b=>{
+  const w=scaleX(b.nps), lo=scaleX(b.lo), hi=scaleX(b.hi);
+  fb.appendChild(el("div","bar",`
+    <span class="nm">${b.name}</span>
+    <div class="track">
+      <div class="fill" style="width:${w}%"></div>
+      <div class="whisk" style="left:${lo}%;width:${hi-lo}%"></div>
+    </div>
+    <span class="val">+${b.nps} <small>·${b.mean}</small></span>`));
+});
+const top=D.nps.blocks_sorted[0], bot=D.nps.blocks_sorted[D.nps.blocks_sorted.length-1];
+$("#fmtNote").innerHTML=`<div class="h">Как читать</div>
+  Лидеры — <b>${top.name}</b> (+${top.nps}) и практико-ориентированные форматы (GenAI, хакатон). Ниже остальных — <b>${bot.name}</b> (+${bot.nps}) и «Защита проекта». Но их доверительные интервалы перекрываются с серединой рейтинга, поэтому корректный вывод: это «крепкая середина», а не провал. Приоритет для доработки — форматы с самым длинным хвостом оценок ≤6.`;
+
+/* 1-5 scales */
+const sc=D.scales.scales;
+const scOrder=["Интерес","Психол. безопасность","Ценность взаимодействия","Форматы рефлексии","Применимость знаний","Понятность материала","Достижение целей"];
+const sr=$("#scaleRows");
+scOrder.forEach(name=>{
+  const s=sc[name];const dist=s.dist;const n=s.n;
+  const seg=k=>pct(dist[String(k)]||0,n);
+  sr.appendChild(el("div","srow",`
+    <span class="nm">${name}${name==="Достижение целей"?' <small style="color:var(--graphite)">*n='+n+'</small>':''}</span>
+    <span class="mn">${s.mean}<small>/5</small></span>
+    <div><div class="stack">
+      <i class="s5" style="width:${seg(5)}%"></i><i class="s4" style="width:${seg(4)}%"></i>
+      <i class="s3" style="width:${seg(3)}%"></i><i class="s2" style="width:${seg(2)}%"></i>
+      <i class="s1" style="width:${seg(1)}%"></i>
+    </div><span class="t2b-tag">Top-2-Box (4–5): <b style="color:var(--ink)">${s.t2b}%</b></span></div>`));
+});
+
+/* freq lists */
+function freqList(sel,obj,total,warm,limit){
+  const entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,limit||99);
+  const max=Math.max(...entries.map(e=>e[1]));
+  $(sel).innerHTML=entries.map(([k,v])=>`
+    <div class="frow">
+      <div class="fb"><i class="${warm?'warm':''}" style="width:${pct(v,max)}%"></i><span class="ft">${k}</span></div>
+      <span class="fn">${v} <small>${Math.round(pct(v,total))}%</small></span>
+    </div>`).join("");
+}
+const N=m.n;
+freqList("#capital",D.scales.capital,N);
+freqList("#helped",D.scales.helped,N);
+freqList("#hinder",D.scales.hinder,N,true);
+freqList("#difficulty",D.scales.difficulty,N,true);
+freqList("#valuable",D.qual.valuable,N);
+freqList("#diffs",D.qual.difficulties,N,true);
+
+/* drivers */
+const dv=D.seg.drivers.slice(0,10);
+const dmax=Math.max(...dv.map(d=>d[1]));
+$("#drivers").innerHTML=dv.map(([k,v])=>`
+  <div class="frow">
+    <div class="fb"><i style="width:${pct(v,dmax)}%"></i><span class="ft">${k}</span></div>
+    <span class="fn">r=${v.toFixed(2)}</span>
+  </div>`).join("");
+
+/* segments */
+function segBlock(sel,arr,keyName){
+  const max=100;
+  $(sel).innerHTML=arr.map(s=>{
+    const nps=s.nps==null?"—":(s.nps>=0?"+":"")+s.nps;
+    const w=s.nps==null?0:Math.max(0,s.nps);
+    const label=s[keyName]||s.group||s.g;
+    return `<div class="segrow"><span class="sg">${label}</span><span class="npsbadge">${nps}</span><span class="sn">n=${s.n}</span>
+      <div class="segbar"><i style="width:${w}%"></i></div></div>`;
+  }).join("");
+}
+segBlock("#segStazh",D.seg.seg,"group");
+segBlock("#segGender",D.seg.gender,"g");
+segBlock("#segAge",D.seg.age,"g");
+$("#segNote").innerHTML=`<div class="h">Что видно</div>
+  Женщины (n=56) рекомендуют заметно активнее мужчин (+78.6 против +63.2). По стажу самая «сдержанная» группа — опытные педагоги «от 3 до 10 лет» (+61.5, n=26): вероятная точка роста, стоит посмотреть их барьеры отдельно. Группы «до 3 лет» и «не преподаю» показывают +100, но n≤7 — статистически это шум.`;
+$("#golosNote").innerHTML=`<b>93%</b> участников не столкнулись со сложностями во взаимодействии («нет» + «скорее нет»). Коммуникация в группах прошла гладко.`;
+
+/* data table */
+const T=D.table;
+const npsCols=new Set([5,6,7,8,9,10,11,12,13,14,15,16]); // indices with 0-10 scales
+let tbl=$("#dataTable");
+function renderTable(rows){
+  let html="<thead><tr>"+T.headers.map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
+  html+=rows.map(r=>"<tr>"+r.map((c,i)=>{
+    let cls="";
+    if(npsCols.has(i)&&c!==""){const n=Number(c);if(n>=9)cls="cellhi";else if(n<=6&&n>=0)cls="celllo";}
+    return `<td class="${cls}">${c}</td>`;
+  }).join("")+"</tr>").join("");
+  html+="</tbody>";
+  tbl.innerHTML=html;
+  $("#tblCount").textContent=rows.length+" из "+T.rows.length+" строк";
+}
+renderTable(T.rows);
+$("#tblSearch").addEventListener("input",e=>{
+  const q=e.target.value.toLowerCase().trim();
+  if(!q){renderTable(T.rows);return;}
+  renderTable(T.rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(q))));
+});
+</script>
+</body>
+</html>
