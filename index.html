@@ -430,7 +430,7 @@ function renderCity(){
     `<span class="pill">Ср. возраст: <b>${D.seg.age_mean}</b></span>`,
     `<span class="pill">RR: <b>не определён</b></span>`
   ].join("");
-  $("#footerLine").innerHTML = `Источник: ${city.source}. Методика: NPS (промоутеры 9–10 − критики 0–6), Top-2-Box для шкал 1–5, доверительные интервалы 95%. <b>CSI организации и RR</b> не рассчитаны — см. раздел «Обзор».`;
+  $("#footerLine").innerHTML = `Источник: ${city.source}. Методика: NPS (промоутеры 9–10 − критики 0–6), Top-2-Box для шкал 1–5, доверительные интервалы 95%.`;
 
   const part=D.nps.participate;
   const kpi=[
@@ -464,7 +464,6 @@ function renderCity(){
   const outN = D.nps.age_outliers||0;
   $("#limitsBox").innerHTML=`
     <div class="h">⚠ Ограничения расчёта</div>
-    CSI организации — в выгрузке нет колонок по проживанию, питанию, сопровождению; посчитать нельзя.<br>
     RR (Response Rate) — не определён: нужен внешний знаменатель (число участников площадки).<br>
     ${outN?`Возраст: ${outN} выброс исключён из расчётов.`:"Возрастных выбросов в этой выборке нет."}`;
 
