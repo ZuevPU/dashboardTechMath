@@ -166,6 +166,7 @@ footer b{color:var(--ink)}
 
 
 
+
 /* city switch */
 .citybar{background:#0F0F0F;border-top:1px solid rgba(255,255,255,.08);padding-bottom:4px}
 .citybar .wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px;padding-bottom:14px}
@@ -195,6 +196,29 @@ footer b{color:var(--ink)}
  .bar .track{grid-column:1}
  .bar .val{grid-column:2}
 }
+#dataTable thead th{cursor:pointer;user-select:none;white-space:nowrap}
+#dataTable thead th:hover{color:var(--green)}
+#dataTable thead th.sorted{color:var(--green)}
+#dataTable tbody tr{cursor:pointer}
+#dataTable tbody tr.active-row td{background:#EDF6E2}
+.modal{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex}
+.modal-bg{position:absolute;inset:0;background:rgba(15,15,15,.46)}
+.modal-card{position:relative;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:16px;
+  max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:22px 22px 18px}
+.modal-close{position:absolute;top:12px;right:12px;border:0;background:#F0F2ED;width:32px;height:32px;border-radius:50%;
+  font-size:20px;line-height:1;cursor:pointer;color:var(--ink)}
+.modal-close:hover{background:var(--green)}
+.pc-head{padding-right:36px}
+.pc-meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.pc-meta span{background:#F0F2ED;border-radius:20px;padding:4px 10px;font-size:12px;color:var(--graphite)}
+.pc-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.pc-block{margin-bottom:16px}
+.pc-row{display:grid;grid-template-columns:1fr 54px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.pc-row:last-child{border:0}
+.pc-name{font-size:13px;line-height:1.35}
+.pc-score{font-weight:800;text-align:right}
+@media(max-width:820px){.pc-kpis{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -300,13 +324,21 @@ footer b{color:var(--ink)}
     <section class="panel" id="p-dannye">
       <div class="eyebrow">лист данных · response-level</div>
       <h2>Таблица ответов</h2>
-      <p class="lead" id="tblLead">Полная выгрузка на уровне респондента. Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики.</p>
+      <p class="lead" id="tblLead">Полная выгрузка на уровне респондента. Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики. Клик по заголовку сортирует колонку, клик по строке открывает карточку участника.</p>
       <div class="tbl-tools">
         <input id="tblSearch" placeholder="Поиск по таблице…">
         <span class="cnt" id="tblCount"></span>
       </div>
       <div class="tablewrap"><table id="dataTable"></table></div>
     </section>
+  </div>
+
+  <div id="rowModal" class="modal" aria-hidden="true">
+    <div class="modal-bg" id="rowModalBg"></div>
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="rowModalClose" aria-label="Закрыть">×</button>
+      <div id="rowModalBody"></div>
+    </div>
   </div>
 
   <div id="avgView" style="display:none">
@@ -349,6 +381,8 @@ const TABS=[["obzor","обзор"],["formaty","форматы"],["opyt","опы�
 let cityId = "rostov";
 let sectionId = "obzor";
 let tblBound = false;
+let sortCol = null;
+let sortDir = 1;
 
 function npsTxt(v){
   if(v==null || v==="") return "—";
@@ -394,6 +428,8 @@ function secTabs(){
 
 function setCity(id){
   cityId=id;
+  sortCol=null; sortDir=1;
+  closeCard();
   cityBar();
   if(id==="avg"){
     $("#cityView").style.display="none";
@@ -564,21 +600,55 @@ function renderCity(){
   const noDiff = (D.qual.difficulties["Нет"]||0)+(D.qual.difficulties["Скорее нет, чем да"]||0);
   $("#golosNote").innerHTML=`${Math.round(pct(noDiff,N))}% участников не столкнулись со сложностями во взаимодействии («нет» + «скорее нет»).`;
 
-  $("#tblLead").innerHTML=`Полная выгрузка на уровне респондента (${D.table.rows.length} строк). Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики.`;
-  renderTable(D.table.rows);
+  $("#tblLead").innerHTML=`Полная выгрузка на уровне респондента (${D.table.rows.length} строк). Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики. Клик по заголовку сортирует колонку, клик по строке открывает карточку.`;
+  sortCol=null; sortDir=1;
+  renderTable();
 }
 
-function renderTable(rows){
+function npsClass(v, isTen){
+  if(v==="" || v==null) return "";
+  const n=Number(v);
+  if(Number.isNaN(n)) return "";
+  if(isTen){ if(n>=9) return "cellhi"; if(n<=6 && n>=0) return "celllo"; }
+  else { if(n>=4) return "cellhi"; if(n<=2 && n>=1) return "celllo"; }
+  return "";
+}
+
+function visibleRows(){
+  const city=DATA.cities[cityId]; if(!city) return [];
+  const T=city.D.table;
+  const q=($("#tblSearch") && $("#tblSearch").value || "").toLowerCase().trim();
+  let rows=T.rows.slice();
+  if(q) rows=rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(q)));
+  if(sortCol!=null){
+    rows.sort((a,b)=>{
+      const va=a[sortCol], vb=b[sortCol];
+      const na=Number(va), nb=Number(vb);
+      const an=va!=="" && va!=null && !Number.isNaN(na);
+      const bn=vb!=="" && vb!=null && !Number.isNaN(nb);
+      let cmp=0;
+      if(an && bn) cmp=na-nb;
+      else cmp=String(va??"").localeCompare(String(vb??""),"ru",{numeric:true,sensitivity:"base"});
+      return cmp*sortDir;
+    });
+  }
+  return rows;
+}
+
+function renderTable(){
   const city = DATA.cities[cityId];
   if(!city) return;
   const T=city.D.table;
+  const rows=visibleRows();
   const npsCols=new Set();
   for(let i=5;i<T.headers.length-7;i++) npsCols.add(i);
   const tbl=$("#dataTable");
-  let html="<thead><tr>"+T.headers.map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>";
-  html+=rows.map(r=>"<tr>"+r.map((c,i)=>{
-    let cls="";
-    if(npsCols.has(i)&&c!==""){const n=Number(c);if(n>=9)cls="cellhi";else if(n<=6&&n>=0)cls="celllo";}
+  let html="<thead><tr>"+T.headers.map((h,i)=>{
+    const mark=sortCol===i?(sortDir>0?" ▲":" ▼"):"";
+    return `<th data-col="${i}" class="${sortCol===i?"sorted":""}">${h}${mark}</th>`;
+  }).join("")+"</tr></thead><tbody>";
+  html+=rows.map(r=>`<tr data-id="${r[0]}">`+r.map((c,i)=>{
+    const cls=npsCols.has(i)?npsClass(c,true):"";
     return `<td class="${cls}">${c}</td>`;
   }).join("")+"</tr>").join("");
   html+="</tbody>";
@@ -586,16 +656,72 @@ function renderTable(rows){
   $("#tblCount").textContent=rows.length+" из "+T.rows.length+" строк";
 }
 
+function closeCard(){
+  const m=$("#rowModal");
+  if(!m) return;
+  m.classList.remove("on");
+  m.setAttribute("aria-hidden","true");
+  document.querySelectorAll("#dataTable tbody tr").forEach(tr=>tr.classList.remove("active-row"));
+}
+
+function openCard(row){
+  const city=DATA.cities[cityId]; if(!city||!row) return;
+  const H=city.D.table.headers;
+  const scaleStart=H.length-7;
+  const fmtStart=7;
+  const scoreRow=(label,val,isTen)=>{
+    const cls=npsClass(val,isTen);
+    return `<div class="pc-row"><div class="pc-name">${label}</div><div class="pc-score ${cls}">${val===""||val==null?"—":val}</div></div>`;
+  };
+  const fmtHtml=H.slice(fmtStart,scaleStart).map((h,i)=>scoreRow(h,row[fmtStart+i],true)).join("");
+  const scHtml=H.slice(scaleStart).map((h,i)=>scoreRow(h,row[scaleStart+i],false)).join("");
+  $("#rowModalBody").innerHTML=`
+    <div class="pc-head">
+      <div class="eyebrow">участник</div>
+      <h2 style="margin:0 0 4px">ID ${row[0]}</h2>
+      <div class="sub" style="color:var(--graphite)">${city.name} · ответ в ${row[1]||"—"}</div>
+    </div>
+    <div class="pc-meta">
+      <span>${row[2]||"пол не указан"}</span>
+      <span>${row[3]!==""&&row[3]!=null?row[3]+" лет":"возраст не указан"}</span>
+      <span>${row[4]||"стаж не указан"}</span>
+    </div>
+    <div class="pc-kpis">
+      <div class="card"><div class="klabel">NPS программы</div><div class="kval sm ${npsClass(row[5],true)}">${row[5]}</div><div class="knote">0–10 · 9–10 промоутер, ≤6 критик</div></div>
+      <div class="card"><div class="klabel">Участвовать ещё</div><div class="kval sm ${npsClass(row[6],true)}">${row[6]}</div><div class="knote">готовность к другим программам</div></div>
+    </div>
+    <div class="pc-block card"><div class="klabel">Оценки форматов · 0–10</div>${fmtHtml}</div>
+    <div class="pc-block card"><div class="klabel">Опыт обучения · 1–5</div>${scHtml}</div>`;
+  const modal=$("#rowModal");
+  modal.classList.add("on");
+  modal.setAttribute("aria-hidden","false");
+  document.querySelectorAll("#dataTable tbody tr").forEach(tr=>{
+    tr.classList.toggle("active-row", String(tr.getAttribute("data-id"))===String(row[0]));
+  });
+}
+
 function bindSearch(){
   if(tblBound) return;
   tblBound=true;
-  $("#tblSearch").addEventListener("input",e=>{
-    const city=DATA.cities[cityId]; if(!city) return;
-    const T=city.D.table;
-    const q=e.target.value.toLowerCase().trim();
-    if(!q){renderTable(T.rows);return;}
-    renderTable(T.rows.filter(r=>r.some(c=>String(c).toLowerCase().includes(q))));
+  $("#tblSearch").addEventListener("input",()=>renderTable());
+  $("#dataTable").addEventListener("click",e=>{
+    const th=e.target.closest("th");
+    if(th && th.hasAttribute("data-col")){
+      const col=Number(th.getAttribute("data-col"));
+      if(sortCol===col) sortDir=sortDir*-1;
+      else { sortCol=col; sortDir=1; }
+      renderTable();
+      return;
+    }
+    const tr=e.target.closest("tbody tr");
+    if(!tr) return;
+    const id=tr.getAttribute("data-id");
+    const row=visibleRows().find(r=>String(r[0])===String(id));
+    if(row) openCard(row);
   });
+  $("#rowModalBg").addEventListener("click",closeCard);
+  $("#rowModalClose").addEventListener("click",closeCard);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeCard(); });
 }
 
 function readyCities(){
