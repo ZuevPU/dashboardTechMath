@@ -171,6 +171,7 @@ footer b{color:var(--ink)}
 
 
 
+
 /* city switch */
 .citybar{background:#0F0F0F;border-top:1px solid rgba(255,255,255,.08);padding-bottom:4px}
 .citybar .wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px;padding-bottom:14px}
@@ -258,13 +259,10 @@ footer b{color:var(--ink)}
       <p class="lead" id="obzorLead">Главная метрика — NPS программы. Показатели приведены с 95% доверительными интервалами.</p>
       <div class="grid g4" id="kpiCards"></div>
       <div class="sec"></div>
-      <div class="grid g2">
-        <div class="card">
+      <div class="card">
           <div class="klabel">Распределение · рекомендация программы</div>
           <div id="npsSplit"></div>
         </div>
-        <div class="callout warn" id="limitsBox"></div>
-      </div>
       <div class="sec"></div>
       <div class="eyebrow">кто ответил</div>
       <h2 style="margin-bottom:14px">Портрет выборки</h2>
@@ -606,8 +604,7 @@ function renderCity(){
     `<span class="pill">Город: <b>${city.name}</b></span>`,
     `<span class="pill">Ответов: <b>${m.n}</b></span>`,
     `<span class="pill">NPS программы: <b>${npsTxt(m.nps)}</b></span>`,
-    `<span class="pill">Ср. возраст: <b>${D.seg.age_mean}</b></span>`,
-    `<span class="pill">RR: <b>не определён</b></span>`
+    `<span class="pill">Ср. возраст: <b>${D.seg.age_mean}</b></span>`
   ].join("");
   $("#footerLine").innerHTML = `Источник: ${city.source}. Методика: NPS (промоутеры 9–10 − критики 0–6), Top-2-Box для шкал 1–5, доверительные интервалы 95%.`;
 
@@ -638,13 +635,7 @@ function renderCity(){
       <span><i class="dot" style="background:var(--grey)"></i>Пассивы (7–8) — ${m.p_pas}%</span>
       <span><i class="dot" style="background:var(--red)"></i>Критики (0–6) — ${m.p_det}%</span>
     </div>
-    <p class="knote">Распределение прижато к максимуму (ср. ${m.mean}/10). Высокий NPS отчасти отражает «потолочный эффект» и вероятную самоселекцию: опрос заполнили сразу после интенсива. Интерпретировать как высокую лояльность, но не как точную оценку без учёта RR.</p>`;
-
-  const outN = D.nps.age_outliers||0;
-  $("#limitsBox").innerHTML=`
-    <div class="h">⚠ Ограничения расчёта</div>
-    RR (Response Rate) — не определён: нужен внешний знаменатель (число участников площадки).<br>
-    ${outN?`Возраст: ${outN} выброс исключён из расчётов.`:"Возрастных выбросов в этой выборке нет."}`;
+    <p class="knote">Распределение прижато к максимуму (ср. ${m.mean}/10). Высокий NPS отчасти отражает «потолочный эффект»: опрос заполнили сразу после интенсива.</p>`;
 
   const dem=D.demo;
   const ageN = Object.values(dem.age_hist||{}).reduce((a,b)=>a+b,0);
