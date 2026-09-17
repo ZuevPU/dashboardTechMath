@@ -246,6 +246,7 @@ footer b{color:var(--ink)}
 .priority-num{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--green);font-weight:800;margin-bottom:9px}
 .priority-card h3{font-size:20px;margin:0 0 9px;line-height:1.15}.priority-card p{margin:0;color:var(--graphite);line-height:1.55;font-size:14px}
 @media(max-width:820px){.pc-kpis{grid-template-columns:1fr}}
+.voice-section{margin:22px 0;padding:28px}.voice-section>h3{font-size:25px;line-height:1.25;margin:10px 0 16px;max-width:850px}.voice-summary{font-size:17px;line-height:1.65;max-width:980px;color:var(--graphite)}.voice-metrics{display:flex;flex-wrap:wrap;gap:32px;padding:20px 0 26px;border-bottom:1px solid var(--line);margin-bottom:24px}.voice-metrics strong{display:block;font-size:32px}.voice-metrics small{font-size:16px;color:#72796d}.voice-metrics span{font-size:12px;color:var(--graphite)}.voice-section h4{font-size:16px;margin:0 0 14px}.voice-theme{border-bottom:1px solid var(--line);padding:13px 0}.voice-theme summary{display:flex;justify-content:space-between;gap:16px;cursor:pointer;font-size:14px;line-height:1.45}.voice-theme summary span:before{content:'＋';margin-right:8px;color:var(--green)}.voice-theme[open] summary span:before{content:'−'}.voice-theme b{white-space:nowrap}.voice-theme small{font-weight:400;color:var(--graphite)}.voice-theme-bar{height:4px;background:#edf0e9;margin:12px 0}.voice-theme-bar i{display:block;height:100%;background:var(--green)}.voice-quote{margin:16px 0;padding:14px 18px;border-left:3px solid var(--green);background:#f5f7f2;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6}.voice-quote footer{background:none;color:#70766b;padding:8px 0 0;font-size:11px}.voice-action{background:#f5f7f2;border-radius:14px;padding:18px;margin:0 0 12px}.voice-action h4{margin-bottom:8px}.voice-action p,.voice-method p{font-size:14px;line-height:1.6;color:var(--graphite)}.voice-action summary,.voice-method summary{font-size:13px;cursor:pointer;color:var(--graphite)}.voice-method{border-top:1px solid var(--line);margin-top:25px;padding-top:18px}@media(max-width:700px){.voice-section{padding:18px}.voice-section>h3{font-size:21px}.voice-metrics{gap:18px}.voice-metrics strong{font-size:26px}}
 </style>
 </head>
 <body>
@@ -334,6 +335,7 @@ footer b{color:var(--ink)}
     </section>
 
     <section class="panel" id="p-golos">
+      <div id="semanticVoice"></div>
       <div class="eyebrow">качественный блок</div>
       <h2>Голос участников</h2>
       <p class="lead">Ценность взаимодействия с коллегами — прекодированные ответы. И самооценка сложностей в коммуникации.</p>
@@ -734,10 +736,77 @@ function renderCity(){
     Группы с n&lt;10 смотреть как ориентир, не как вывод.`;
 
   const noDiff = (D.qual.difficulties["Нет"]||0)+(D.qual.difficulties["Скорее нет, чем да"]||0);
+  renderSemanticVoice(city);
   $("#golosNote").innerHTML=`${Math.round(pct(noDiff,N))}% участников не столкнулись со сложностями во взаимодействии («нет» + «скорее нет»).`;
 
   $("#tblLead").innerHTML=`Полная выгрузка на уровне респондента (${D.table.rows.length} строк). Ячейки шкал 0–10: <span class="cellhi">9–10</span> промоутеры · <span class="celllo">≤6</span> критики. Клик по заголовку сортирует, клик по строке открывает карточку. Кнопка «Править таблицу» включает редактирование ячеек; правки сохраняются в этом браузере.`;
   renderTable();
+}
+
+// Themes were reviewed against the full comments, separately for each question.
+// Indices refer to source comment rows, never to the sorted/editable response table.
+const VOICE_REVIEW = {
+ tambov:{
+  w:{summary:'Благодарят за подачу, экспертов и комфортную атмосферу. Среди конкретных запросов — больше практики, менее длинный учебный день и связь содержания с реальной школой.',
+   themes:[['Эксперты и понятная подача',[4,18,19,24,35,42,47]],['Польза и практические инструменты',[19,41,47,50,51,53]],['Комфорт и организация',[16,18,24,30,40]],['Продолжение обучения',[18,40]],['Применимость в школе',[0]],['Продолжительность дня',[1]],['Больше практики',[27]],['Внеучебная программа',[3]]],
+   requests:[0,1,3,27], neutral:[], exclude:[45],
+   actions:[['Связать обучение со школьными условиями',[0],'Добавить разбор урока с ограничениями по времени, оснащению и подготовке детей. Это предложение аналитика в ответ на критику применимости.'],['Пересмотреть нагрузку и практику',[1,27],'Проверить длительность учебного дня и выделить время на самостоятельное применение инструментов.'],['Дополнить внеучебную часть',[3],'Рассмотреть необязательную экскурсию или музей после основной программы.']]},
+  e:{summary:'Дополнительное поле раскрывает запросы, которые теряются за общей высокой оценкой: практика, два уровня сложности, темп речи и удобная навигация. Отдельный участник ставит под сомнение приоритет проектов по сравнению с подготовкой к ЕГЭ.',
+   themes:[['Эксперты и команда',[1,30,53,58]],['Больше практики',[19]],['Разные уровни сложности',[36]],['Темп речи',[51]],['Навигация и анкета',[12]],['Расширение аудитории',[24]],['ЕГЭ и проектное обучение',[0]],['Продолжение обучения',[47]],['Мотивация к развитию',[17]]],
+   requests:[0,12,19,24,36,51],neutral:[3],exclude:[33,45,54],
+   actions:[['Предусмотреть два уровня заданий',[36],'Базовая и продвинутая версии одной задачи позволят участникам выбрать подходящую сложность.'],['Улучшить практику и объяснения',[19,51],'Добавить самостоятельную работу и паузы после ключевых объяснений.'],['Исправить навигацию',[12],'Рассмотреть фото ведущих в анкете, крупные цветные метки на бейджах и двусторонние номера столов.'],['Обсудить образовательные приоритеты',[0],'Показать, где проектная работа помогает предметным результатам, и обсудить её ограничения.']]}
+ },
+ kalmykia:{
+  w:{summary:'Основной мотив — благодарность команде и интерес к продолжению. Два ответа прямо предлагают увеличить длительность очного обучения; один сочетает благодарность с замечанием о духоте и шуме.',
+   themes:[['Команда и сопровождение',[4,18,20,21,22,35,36,40,41,53,56]],['Польза и новые знания',[4,20,33,35,36,42,52,53,58]],['Продолжение обучения',[11,23,28,43,55]],['Увеличить длительность',[28,55]],['Условия в аудитории',[16]],['ИИ и нейросети',[42]]],requests:[16,28,55],neutral:[],exclude:[9],
+   actions:[['Проверить условия аудитории',[16],'Проверить вентиляцию и источники шума. Один отзыв — повод для проверки, а не вывод обо всей площадке.'],['Рассмотреть продолжение',[28,55],'Сопоставить предложение о более длинном очном формате с возможностью дополнительного практического дня.']]},
+  e:{summary:'Дополнительные ответы в основном поддерживают команду. Есть два прямых сигнала интереса к новой встрече и отдельная благодарность за комфортные условия работы.',
+   themes:[['Новая встреча',[22,28]],['Комфортные условия',[21]],['Поддержка команды',[36,43]]],requests:[],neutral:[23],exclude:[8,9,27],
+   actions:[['Предложить следующий шаг',[22,28],'Сообщить участникам о следующем мероприятии или встрече выпускников. Это рекомендация аналитика по выраженному интересу.']]}
+ },
+ rostov:{
+  w:{summary:'Ценят команду, новые идеи и практическую пользу. Конкретные замечания касаются терминологии, темпа, оснащения и упражнения «Мировая кофейня». Запрос на другие предметы стоит рассмотреть отдельно от оценки текущей программы.',
+   themes:[['Команда и организация',[5,22,25,26,34,36,41,44,46,48,50,56]],['Польза, идеи и вдохновение',[1,2,17,20,23,24,26,33,41,46,48,54,56]],['Продолжение обучения',[42]],['Понятный язык',[16]],['Нагрузка и темп',[28]],['Оснащение',[29,54]],['Другие предметы',[18]],['Пересмотр упражнения',[21]],['Условия применения в школе',[20,54]]],
+   requests:[16,18,21,28,29,54],neutral:[15],exclude:[10],
+   actions:[['Упростить терминологию',[16],'Объяснять англоязычные термины и давать русскоязычные инструкции.'],['Проверить темп и оснащение',[28,29],'Запланировать паузы и проверить доступность техники до старта практических блоков.'],['Разобрать упражнение с командой',[21],'Уточнить, что не сработало в «Мировой кофейне»: в ответе причина не раскрыта.'],['Проверить запрос на расширение',[18,54],'Отдельно оценить интерес педагогов других предметов и условия внедрения в школах.']]},
+  e:{summary:'Главные акценты — благодарность организаторам и модератору, ценность обмена педагогическим опытом и желание встречаться чаще. Конкретной критики в этом поле не обнаружено.',
+   themes:[['Организаторы и сопровождение',[13,17,33,41,42,46]],['Знания и обмен опытом',[26,29,34]],['Более частые встречи',[8]]],requests:[8],neutral:[23],exclude:[10,15],
+   actions:[['Поддержать обмен опытом',[8,26],'Рассмотреть регулярные встречи выпускников с разбором того, что удалось применить.']]}
+ },
+ arkhangelsk:{
+  w:{summary:'Благодарят за организацию, подачу и доброжелательную атмосферу. Три конкретных запроса: обратная связь по заданиям, поддержка в течение учебного года и устранение фоновой музыки, мешавшей слышать выступающих.',
+   themes:[['Организация и подача',[5,28,35,42,45,49]],['Знания и практическая польза',[5,12,15,24,28,32,35,36,39,40,48,52,55,58]],['Атмосфера и поддержка',[15,36,41,42,43]],['Общение с коллегами',[40,58]],['Продолжение сотрудничества',[48]],['Обратная связь по заданиям',[37]],['Поддержка после курса',[52]],['Слышимость в аудитории',[56]]],requests:[37,52,56],neutral:[],exclude:[26],
+   actions:[['Усилить обратную связь',[37],'Добавить короткие проверки понимания и разбор выполненных заданий.'],['Организовать поддержку после курса',[52],'Рассмотреть регулярные консультации и базу рекомендаций. Горячая линия или ИИ-бот — варианты, прямо предложенные участником.'],['Убрать музыкальные помехи',[56],'Отключать фоновую музыку во время объяснений и проверять слышимость с последних рядов.']]},
+  e:{summary:'Участники хотят возвращаться и продолжать сотрудничество. Есть наблюдение одного участника о разной лёгкости освоения материала; оно поддерживает идею заданий по уровню подготовки, но не позволяет делать выводы о возрастных группах.',
+   themes:[['Новые встречи и дальнейшее обучение',[17,28,33,40,50,55]],['Поддержка и сотрудничество',[27]],['Знания и вдохновение',[13,24,48]],['Разная подготовка участников',[43]],['Благодарность организаторам',[11,52]]],requests:[27,43],neutral:[1,37],exclude:[32,47],
+   actions:[['Продолжить сопровождение',[27],'Предложить понятный способ обратиться за помощью после очного модуля.'],['Разделять задания по подготовке',[43],'Провести короткую входную диагностику и предложить базовые и продвинутые задания.'],['Предложить следующий модуль',[17,28,33,40,50,55],'Собрать интерес к продолжению и сообщить участникам дальнейший маршрут обучения.']]}
+ }
+};
+
+function renderSemanticVoice(city){
+ const root=$('#semanticVoice'), T=city.D.table, review=VOICE_REVIEW[city.id];
+ const fields=[['w','Ваши пожелания, благодарности, замечания и отзывы по программе','пожелания'],['e','Мне есть, что ещё сказать…','ещё сказать']];
+ root.innerHTML=`<div class="eyebrow">смысловой разбор открытых ответов</div><h2>Что говорят участники</h2><p class="lead">${esc(city.name)} · два вопроса разобраны отдельно. Нажмите на тему, чтобы прочитать все относящиеся к ней ответы.</p>`;
+ for(const [key,title,match] of fields){
+  const notes=T.comments||[], cfg=review?.[key];
+  if(!cfg||!notes.length){root.innerHTML+=`<article class="card voice-section"><h3>${title}</h3><p>Тексты этого поля отсутствуют в текущей выгрузке. Смысловой анализ станет доступен после добавления исходных комментариев.</p></article>`;continue;}
+  const entries=notes.map((row,i)=>({i,text:String(row.find(x=>x.q.toLowerCase().includes(match))?.a||'').trim()})).filter(x=>x.text);
+  const usable=entries.filter(x=>!cfg.exclude.includes(x.i));
+  const valid=new Set(usable.map(x=>x.i));
+  const themes=cfg.themes.map(([name,ids])=>[name,ids.filter(i=>valid.has(i))]).filter(x=>x[1].length).sort((a,b)=>b[1].length-a[1].length);
+  const assigned=new Set(themes.flatMap(x=>x[1]));
+  const rest=usable.filter(x=>!assigned.has(x.i)&&!cfg.neutral.includes(x.i)).map(x=>x.i);
+  if(rest.length)themes.push(['Общая благодарность, одобрение и добрые пожелания',rest]);
+  if(cfg.neutral.some(i=>valid.has(i)))themes.push(['Неоднозначные реплики без конкретного запроса',cfg.neutral.filter(i=>valid.has(i))]);
+  const quote=i=>{const x=entries.find(x=>x.i===i);return x?`<blockquote class="voice-quote">${esc(x.text)}<footer>Ответ №${i+1} в исходной выгрузке</footer></blockquote>`:'';};
+  const requests=cfg.requests.filter(i=>valid.has(i));
+  root.innerHTML+=`<article class="card voice-section"><div class="eyebrow">${key==='w'?'отзывы о программе':'дополнительные комментарии'}</div><h3>${title}</h3><p class="voice-summary">${esc(cfg.summary)}</p>
+   <div class="voice-metrics"><div><strong>${entries.length}<small> / ${T.rows.length}</small></strong><span>заполнили поле</span></div><div><strong>${usable.length}</strong><span>ответов с содержанием</span></div><div><strong>${requests.length}</strong><span>замечаний и запросов на изменения</span></div></div>
+   <div class="grid g2"><div><h4>Темы и подтверждения</h4>${themes.map(([label,ids])=>`<details class="voice-theme"><summary><span>${esc(label)}</span><b>${ids.length} <small>· ${Math.round(ids.length/usable.length*100)}%</small></b></summary><div class="voice-theme-bar"><i style="width:${ids.length/usable.length*100}%"></i></div>${ids.map(quote).join('')}</details>`).join('')}</div>
+   <div><h4>Что можно сделать</h4>${cfg.actions.map(([label,ids,action])=>`<div class="voice-action"><h4>${esc(label)}</h4><p>${esc(action)}</p><details><summary>Основание: ${ids.length} ${ids.length===1?'ответ':'ответа / ответов'}</summary>${ids.map(quote).join('')}</details></div>`).join('')}</div></div>
+   <details class="voice-method"><summary>Как посчитано · исходные ответы</summary><p>Ручная смысловая разметка исходных текстов. Единица подсчёта — ответ одного участника на этот вопрос. Один ответ может относиться к нескольким темам, поэтому сумма долей может превышать 100%. Знаменатель долей — ${usable.length} ответов с содержанием. Пустые поля не означают удовлетворённость. Исключено формальных ответов («нет», одиночная пунктуация и аналогичные): ${entries.length-usable.length}. Эмодзи одобрения сохранены как реакция. Рекомендации сформулированы аналитиком; исходные реплики приведены дословно.</p><details><summary>Все заполненные ответы (${entries.length})</summary>${entries.map(x=>quote(x.i)).join('')}</details></details></article>`;
+ }
+ root.innerHTML+='<div class="sec"></div>';
 }
 
 function npsClass(v, isTen){
